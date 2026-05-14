@@ -25,6 +25,7 @@ This repo is mostly notes and reading material while I get comfortable with the 
 - [`14` — MIDI / external I/O](docs/14-midi-io.md)
 - [`15` — Random & probability](docs/15-random-and-probability.md)
 - [`16` — Strudel vs. TidalCycles](docs/16-strudel-vs-tidal.md)
+- [`17` — Code and workflow](docs/17-code-and-workflow.md)
 
 ## Useful links
 
