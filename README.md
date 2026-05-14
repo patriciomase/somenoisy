@@ -21,6 +21,10 @@ This repo is mostly notes and reading material while I get comfortable with the 
 - [`10` — Signals (modulation sources)](docs/10-signals.md)
 - [`11` — Samples (loading + manipulation)](docs/11-samples.md)
 - [`12` — Pattern factories](docs/12-factories.md)
+- [`13` — Tonal functions (scales, chords)](docs/13-tonal.md)
+- [`14` — MIDI / external I/O](docs/14-midi-io.md)
+- [`15` — Random & probability](docs/15-random-and-probability.md)
+- [`16` — Strudel vs. TidalCycles](docs/16-strudel-vs-tidal.md)
 
 ## Useful links
 

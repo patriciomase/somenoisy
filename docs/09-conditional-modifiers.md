@@ -4,13 +4,9 @@ Source: <https://strudel.cc/learn/conditional-modifiers/>
 
 Functions that apply a transformation conditionally, restructure patterns, or pick between alternatives.
 
-> ⚠️ **Gap:** the page index lists `every`, `sometimes`, `sometimesBy`, `often`, `rarely`, `never`, `always` —
-> the doc-fetch didn't surface their detail. The semantics in Tidal-land:
-> - `every(n, fn)` applies `fn` every `n` cycles.
-> - `sometimes(fn)` ≈ `sometimesBy(0.5, fn)` — applies `fn` with probability `p`.
-> - `often`/`rarely` are `sometimesBy(0.75, ...)` / `sometimesBy(0.25, ...)`.
-> - `always`/`never` are the degenerate cases (probability 1 / 0).
-> Verify against the page when you need them.
+> See also: **`15-random-and-probability.md`** for the probability-driven family
+> (`sometimes`, `sometimesBy`, `often`, `rarely`, `someCycles`, `degrade`, `choose`, …).
+> Those live on the `/learn/random-modifiers/` page, not this one — but conceptually they're part of the same toolkit.
 
 ---
 
@@ -18,8 +14,11 @@ Functions that apply a transformation conditionally, restructure patterns, or pi
 
 | Function | Behavior | Example |
 |---|---|---|
+| `every(n, fn)` | Apply `fn` every n cycles. **The canonical conditional.** | `n("0 1 3").every(3, add.squeeze("10 20")).s("triangle")` |
 | `lastOf(n, fn)` | Apply `fn` on the **last** of every n cycles | `note("c3 d3 e3 g3").lastOf(4, x => x.rev())` |
 | `firstOf(n, fn)` | Apply `fn` on the **first** of every n cycles | `note("c3 d3 e3 g3").firstOf(4, x => x.rev())` |
+
+> Note on `every`: not surfaced in either the `conditional-modifiers` or `random-modifiers` reference pages I scraped, but clearly real — it appears in the `strudel-vs-tidal` worked example. Behaves the same as Tidal's `every`. Reach for the source if you need the full signature.
 
 ## Pattern-driven gating
 
