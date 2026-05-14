@@ -1,0 +1,110 @@
+#!/usr/bin/env node
+// strudel-play — push a patch file (or stdin) into the running Strudel REPL.
+//
+// Usage:
+//   ./tools/strudel-play patches/current.js          send a file
+//   echo 's("bd hh")' | ./tools/strudel-play -        send stdin
+//   ./tools/strudel-play --stop                       hush the current pattern
+//   ./tools/strudel-play --watch patches/current.js   resend on file change
+//
+// Bridge server must be running:
+//   node tools/bridge-server.mjs
+
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const BRIDGE = process.env.STRUDEL_BRIDGE_URL || 'http://127.0.0.1:4322';
+
+const args = process.argv.slice(2);
+if (args.length === 0 || args.includes('-h') || args.includes('--help')) {
+  console.error(`strudel-play
+
+Send Strudel code to the running REPL via the local bridge.
+
+Usage:
+  strudel-play <file>          send a patch file
+  strudel-play -               send stdin
+  strudel-play --stop          hush the current pattern
+  strudel-play --watch <file>  resend on file change
+
+Env:
+  STRUDEL_BRIDGE_URL  default http://127.0.0.1:4322
+`);
+  process.exit(args.length === 0 ? 1 : 0);
+}
+
+async function send(payload) {
+  const res = await fetch(`${BRIDGE}/eval`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  }).catch((e) => {
+    console.error(`[strudel-play] bridge unreachable at ${BRIDGE}: ${e.message}`);
+    console.error('Is `node tools/bridge-server.mjs` running?');
+    process.exit(2);
+  });
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok || !body.ok) {
+    console.error(`[strudel-play] bridge error: ${body.error || res.statusText}`);
+    process.exit(3);
+  }
+  if (body.subscribers === 0) {
+    console.warn('[strudel-play] no REPL subscribers connected — open the Strudel tab');
+  }
+  return body;
+}
+
+async function sendFile(file) {
+  const absPath = path.resolve(file);
+  const code = fs.readFileSync(absPath, 'utf8');
+  await send({ type: 'eval', code, path: absPath });
+  console.log(`[strudel-play] sent ${path.basename(file)} (${code.length} bytes) — bridge will snapshot back to this file`);
+}
+
+async function sendStdin() {
+  const code = await new Promise((resolve) => {
+    let data = '';
+    process.stdin.setEncoding('utf8');
+    process.stdin.on('data', (c) => (data += c));
+    process.stdin.on('end', () => resolve(data));
+  });
+  await send({ type: 'eval', code });
+  console.log(`[strudel-play] sent ${code.length} bytes from stdin`);
+}
+
+async function stop() {
+  await send({ type: 'stop' });
+  console.log('[strudel-play] stop sent');
+}
+
+async function watch(file) {
+  await sendFile(file);
+  console.log(`[strudel-play] watching ${file} — Ctrl+C to stop`);
+  let last = 0;
+  fs.watch(file, { persistent: true }, async () => {
+    // dedupe: editors often fire multiple events per save
+    const now = Date.now();
+    if (now - last < 100) return;
+    last = now;
+    try {
+      await sendFile(file);
+    } catch (e) {
+      console.error(`[strudel-play] watch send failed: ${e.message}`);
+    }
+  });
+}
+
+if (args[0] === '--stop') {
+  await stop();
+} else if (args[0] === '--watch') {
+  if (!args[1]) {
+    console.error('--watch requires a file');
+    process.exit(1);
+  }
+  await watch(args[1]);
+} else if (args[0] === '-') {
+  await sendStdin();
+} else {
+  await sendFile(args[0]);
+}
