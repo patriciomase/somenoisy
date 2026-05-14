@@ -17,6 +17,10 @@ This repo is mostly notes and reading material while I get comfortable with the 
 - [`06` — Mini-notation reference](docs/06-mini-notation.md)
 - [`07` — Effects reference](docs/07-effects-reference.md)
 - [`08` — Synths](docs/08-synths.md)
+- [`09` — Conditional / structural modifiers](docs/09-conditional-modifiers.md)
+- [`10` — Signals (modulation sources)](docs/10-signals.md)
+- [`11` — Samples (loading + manipulation)](docs/11-samples.md)
+- [`12` — Pattern factories](docs/12-factories.md)
 
 ## Useful links
 
