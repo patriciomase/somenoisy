@@ -4,14 +4,23 @@ A learning sandbox for **[Strudel](https://strudel.cc)** — the browser-based l
 
 This repo is mostly notes and reading material while I get comfortable with the language. Patches will live alongside the docs as I write them.
 
-## Layout
+## Notes
 
-- `docs/` — notes from reading the official docs, terminology, mental models
-- `patches/` — saved sketches (will appear later)
+### Workshop (intro)
+- [`01` — Getting started / first sounds](docs/01-getting-started.md)
+- [`02` — First notes](docs/02-first-notes.md)
+- [`03` — First effects](docs/03-first-effects.md)
+- [`04` — Pattern effects (transforms)](docs/04-pattern-effects.md)
+- [`05` — Workshop recap](docs/05-workshop-recap.md)
+
+### Deeper reference (from `/learn/`)
+- [`06` — Mini-notation reference](docs/06-mini-notation.md)
+- [`07` — Effects reference](docs/07-effects-reference.md)
+- [`08` — Synths](docs/08-synths.md)
 
 ## Useful links
 
 - Strudel REPL: <https://strudel.cc>
 - Strudel workshop: <https://strudel.cc/workshop/getting-started>
-- Strudel docs: <https://strudel.cc/learn>
+- Strudel docs (`/learn/`): <https://strudel.cc/learn>
 - TidalCycles (the parent language): <https://tidalcycles.org>
