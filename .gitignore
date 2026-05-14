@@ -1,0 +1,2 @@
+# Per-machine Claude Code state — should not be shared
+.claude/settings.local.json

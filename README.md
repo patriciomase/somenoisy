@@ -4,6 +4,18 @@ A learning sandbox for **[Strudel](https://strudel.cc)** — the browser-based l
 
 This repo is mostly notes and reading material while I get comfortable with the language. Patches will live alongside the docs as I write them.
 
+## Claude Code skill
+
+This repo ships a project-scoped Claude Code skill at [`.claude/skills/strudel/`](.claude/skills/strudel/). When Claude Code is launched from this directory, asking it to **write / compose / sketch / make** a Strudel patch (beat, loop, bassline, melody, …) triggers the skill — it consults the bundled reference docs and produces idiomatic, paste-ready Strudel code.
+
+Trigger examples:
+- "Write me a techno beat in Strudel"
+- "Compose a chill ambient loop"
+- "Sketch a polyrhythmic bassline in D minor"
+- "Remix this patch to feel darker"
+
+The skill does **not** fire on reference questions ("what does `jux` do?"); those are direct doc lookups.
+
 ## Notes
 
 ### Workshop (intro)
