@@ -39,6 +39,10 @@ See [REFERENCE.md](REFERENCE.md) for the curated menu: task → which doc to ope
 
 Genre starters, drum-machine shorthand, mode-to-mood mapping, common moves: see [PATTERNS.md](PATTERNS.md). Consult before writing if the request hits an unfamiliar genre.
 
+## Drum patterns — deep reference
+
+Rhythm fundamentals, beat anatomy, syncopation/ghost-notes, polymeter vs polyrhythm, the ABAC/AAAD phrase framework, fills and empties (the "kick drop"), drum-machine character profiles, and paste-ready drum bodies for techno / boom-bap / DnB / dark prog: see [DRUMS.md](DRUMS.md). **Consult any time a request involves drums** — it has both the *why* (theory) and the *how* (Strudel-specific implementation).
+
 ## Common pitfalls
 
 Lazy sample loading, sample-index ordering, tempo defaults, mini-notation traps, single vs double quotes: see [GOTCHAS.md](GOTCHAS.md). Skim before submitting code — these account for most "it doesn't sound right" reports.

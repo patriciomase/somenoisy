@@ -1,21 +1,31 @@
-// break.js — breakbeat groove + matching bass, A minor, 125 BPM
-// Read positions as 16ths across one cycle (1 = downbeat, 5 = beat 2, 9 = beat 3, 13 = beat 4).
+// break.js — dark progressive house with breakbeat flavor, A minor, 125 BPM
+// 16-step grid per cycle. Layered drums + 3-voice bass + percussion shots.
 
 stack(
-  // kick: 1, "a of 1", "and of 2", "and of 3" — syncopated, no 4-on-floor
-  s("bd ~ ~ bd ~ ~ bd ~ ~ ~ bd ~ ~ ~ ~ ~").bank("RolandTR909").gain(0.95),
+  // ===== KICKS — punchy 4OTF (909) + sub layer (808) + occasional break-kick =====
+  s("bd*4").bank("RolandTR909").gain(0.9),
+  s("bd*4").bank("RolandTR808").lpf(100).gain(0.55),
+  s("~ ~ ~ ~ ~ ~ bd ~ ~ ~ ~ ~ ~ ~ bd ~").bank("RolandTR909").gain(0.45),
 
-  // snare on 2 and 4, plus a tiny ghost on the "a of 4"
-  s("~ ~ ~ ~ sd ~ ~ ~ ~ ~ ~ ~ sd ~ ~ sd").bank("RolandTR909").gain("0.85 0.85 0.85 0.4"),
-
-  // 16th hats with random gain wobble + slow stereo
+  // ===== HATS — closed atmospheric wobble + off-beat open hats high-passed =====
   s("hh*16").bank("RolandTR909")
-    .gain(perlin.range(0.2, 0.55))
+    .gain(perlin.range(0.1, 0.25))
     .pan(sine.slow(8)),
+  s("~ oh ~ oh ~ oh ~ oh").bank("RolandTR909")
+    .gain(0.3).hpf(500).pan(sine.slow(7).range(0.3, 0.7)).decay(0.3),
 
-  // breakbeat bass — root on 1, sub stabs around the off-beats, octave punch on "a of 4"
-  note("a1 ~ ~ ~ ~ ~ a2 ~ a1 ~ ~ ~ ~ ~ a2 ~").s("sawtooth")
-    .lpf(900).lpq(7)
-    .attack(0.005).release(0.18)
-    .gain(0.6)
+
+  // ===== BASS STACK =====
+  // sub pulse — pure sine on the root, locks with the kick
+  note("a1*4").s("sine").gain(0.7),
+
+  // reese mid-bass — driving 8ths with accent, vibrato + distortion for teeth
+  note("a1 a2 a1 a2 a1 a2 [a1 c2] a2").s("sawtooth")
+    .vib(5).vibmod(0.2)
+    .lpf(sine.slow(16).range(100, 300)).lpq(10)
+    .attack(0.002).release(0.1)
+    .gain("0.7 0.5 0.55 0.5 0.7 0.5 0.6 0.5")
+    .distort("0.4:0.4"),
+
+
 ).cpm(125/4)
