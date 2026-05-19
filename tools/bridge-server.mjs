@@ -13,6 +13,7 @@
 import http from 'node:http';
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const PORT = Number(process.env.STRUDEL_BRIDGE_PORT || 4322);
 
@@ -20,6 +21,66 @@ const clients = new Set();
 
 // last absolute file path pushed via POST /eval — POST /snapshot writes back here.
 let lastEvalPath = null;
+
+// Current library node — kept so the overlay knows the active patch on reconnect.
+let currentPatch = null;
+
+// Project root (one level up from this file).
+const PROJECT_ROOT = path.resolve(fileURLToPath(import.meta.url), '../..');
+
+// Dynamic import with cache busting so edits to patch/layer files are picked up
+// without restarting the bridge.
+async function freshImport(absPath) {
+  const url = pathToFileURL(absPath).href + `?t=${Date.now()}`;
+  const mod = await import(url);
+  return mod.default ?? mod;
+}
+
+// Compile a declarative patch (patches/<name>.js) into Strudel source code.
+async function compilePatch(name) {
+  const patchPath = path.join(PROJECT_ROOT, 'patches', `${name}.js`);
+  const patch = await freshImport(patchPath);
+  if (!patch || !Array.isArray(patch.layers)) {
+    throw new Error(`patch ${name} is not in declarative form (missing .layers array)`);
+  }
+  const ctx = patch.context ?? {};
+
+  // 1. Samples preamble.
+  // CRITICAL: must use SINGLE-quoted strings inside the map. Strudel's transpiler
+  // treats every double-quoted string as mini-notation; "bd/BT0A0D0.wav" would
+  // be parsed as "bd" slowed by an unparseable "BT0A0D0.wav" → Fraction.div fail.
+  let samplesCall = '';
+  if (patch.samples?.map && patch.samples?.src) {
+    const mapEntries = Object.entries(patch.samples.map).map(([key, val]) => {
+      if (Array.isArray(val)) {
+        return `'${key}': [${val.map((v) => `'${v}'`).join(', ')}]`;
+      }
+      if (typeof val === 'object' && val !== null) {
+        // pitched samples like { g3: 'foo.wav' }
+        const inner = Object.entries(val).map(([k, v]) => `'${k}': '${v}'`).join(', ');
+        return `'${key}': { ${inner} }`;
+      }
+      return `'${key}': '${val}'`;
+    });
+    samplesCall = `samples({ ${mapEntries.join(', ')} }, '${patch.samples.src}');\n\n`;
+  }
+
+  // 2. Resolve each layer to its code string
+  const layerCodes = [];
+  for (const { id, opts = {} } of patch.layers) {
+    const layerPath = path.join(PROJECT_ROOT, 'layers', `${id}.js`);
+    const factory = await freshImport(layerPath);
+    if (typeof factory !== 'function') {
+      throw new Error(`layer ${id} does not export a default function`);
+    }
+    layerCodes.push(factory({ ...ctx, ...opts }));
+  }
+
+  // 3. Compose: samples preamble + stack(...).cpm(...)
+  const stackBody = layerCodes.map((c) => '  ' + c).join(',\n\n');
+  const cpm = patch.cpm ?? 30;
+  return `${samplesCall}stack(\n${stackBody}\n).cpm(${cpm})\n`;
+}
 
 function broadcast(event) {
   const payload = `data: ${JSON.stringify(event)}\n\n`;
@@ -120,6 +181,41 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  // GET /library — returns the graph as JSON for the browser overlay.
+  if (req.method === 'GET' && req.url === '/library') {
+    try {
+      const libPath = path.join(PROJECT_ROOT, 'library.js');
+      const lib = await freshImport(libPath);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ...lib, currentPatch }));
+    } catch (err) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: false, error: err.message }));
+      console.log(`[bridge] /library error: ${err.message}`);
+    }
+    return;
+  }
+
+  // POST /play — body { patch: "name" } — compile the patch and broadcast.
+  if (req.method === 'POST' && req.url === '/play') {
+    try {
+      const raw = await readBody(req);
+      const msg = JSON.parse(raw);
+      if (typeof msg.patch !== 'string') throw new Error('play requires a "patch" string');
+      const code = await compilePatch(msg.patch);
+      currentPatch = msg.patch;
+      broadcast({ type: 'eval', code });
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: true, patch: msg.patch, subscribers: clients.size, bytes: code.length }));
+      console.log(`[bridge] play "${msg.patch}" → ${clients.size} subscriber(s) (${code.length} bytes)`);
+    } catch (err) {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: false, error: err.message }));
+      console.log(`[bridge] play error: ${err.message}`);
+    }
+    return;
+  }
+
   if (req.method === 'POST' && req.url === '/snapshot') {
     try {
       const raw = await readBody(req);
@@ -146,6 +242,8 @@ server.listen(PORT, '127.0.0.1', () => {
   console.log(`[bridge] listening on http://127.0.0.1:${PORT}`);
   console.log(`  POST /eval     { type: "eval", code, path? } or { type: "stop" }`);
   console.log(`  POST /snapshot { code }  →  writes to lastEvalPath`);
+  console.log(`  GET  /library  →  graph JSON for the browser overlay`);
+  console.log(`  POST /play     { patch: "name" }  →  compiles + broadcasts the patch`);
   console.log(`  GET  /events   SSE stream the Strudel REPL subscribes to`);
   console.log(`  GET  /health   sanity check`);
 });

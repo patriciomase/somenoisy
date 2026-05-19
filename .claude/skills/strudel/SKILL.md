@@ -43,6 +43,10 @@ Genre starters, drum-machine shorthand, mode-to-mood mapping, common moves: see 
 
 Rhythm fundamentals, beat anatomy, syncopation/ghost-notes, polymeter vs polyrhythm, the ABAC/AAAD phrase framework, fills and empties (the "kick drop"), drum-machine character profiles, and paste-ready drum bodies for techno / boom-bap / DnB / dark prog: see [DRUMS.md](DRUMS.md). **Consult any time a request involves drums** — it has both the *why* (theory) and the *how* (Strudel-specific implementation).
 
+## Live performance — advanced breakbeat chopping & flow
+
+`scrub` + `seg` for surgical sample chopping, `ribbon(offset, cycles)` to freeze random sequences into deterministic loops, A/B alternation, probabilistic stutters via `almostNever + ply`, the "5+3 wonky" struct pattern, exponential filter sweeps, build-up via `all(...)` global ribbon compression, drop resolution with `newcycle`: see [LIVE-PERFORMANCE.md](LIVE-PERFORMANCE.md). **Consult when** the user asks for breakbeat / jungle / breakcore patches, live-performance flow (build-ups, drops, transitions), or any request to chop / glitch / re-contextualise sampled material.
+
 ## Common pitfalls
 
 Lazy sample loading, sample-index ordering, tempo defaults, mini-notation traps, single vs double quotes: see [GOTCHAS.md](GOTCHAS.md). Skim before submitting code — these account for most "it doesn't sound right" reports.

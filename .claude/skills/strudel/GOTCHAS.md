@@ -74,6 +74,23 @@ A bare `.lpf(800)` is a soft 12 dB/oct slope. For audible filter character (sque
 
 `gm_acoustic_bass`, `gm_synth_strings_1`, etc. are **soundfont samples**. They sound great out of the box but you can't tweak the synthesis parameters (oscillator type, FM, partials). For tweakable synthesis use `sawtooth`, `square`, `sine`, `triangle`, `supersaw`, etc. — see `docs/08-synths.md`.
 
+## `supersaw` at low notes → phantom amplitude peaks
+
+`supersaw` internally stacks several detuned saw oscillators. At very low fundamentals (below ~A2 = 110 Hz), those internal voices produce **constructive amplitude peaks** at note onsets that read as ugly saturation / clicks / "weird interference" — even at safe output gains, even with slow attack, even with the LPF removed. It is **not** output clipping; it is the synth's own intermodulation.
+
+**Symptoms:** clean kicks, but the bass has audible peaks or saturation on every note (worst on the lowest notes). The peaks persist after disabling `.distort`, `.shape`, `.lpf`, `.hpf`, `.resonance`, lowering gain, and slowing attack — all of which would normally fix peakiness.
+
+**Fix:** for bass below A2, use plain `.s("sawtooth")` (single oscillator). Recover supersaw-style thickness with a controlled 2-voice detune layer:
+
+```js
+note("a1*4")
+  .s("sawtooth")
+  .add(note("0,.04"))    // two saws, ~4 cents apart — wide without the peaks
+  .lpf(380).distort(1.2)
+```
+
+**Rule of thumb:** `supersaw` shines for chord stabs, leads, pads — anywhere in the mid-to-high register. For bass below ~A2 (110 Hz), prefer single `sawtooth` with optional manual detune. Discovered the hard way via a 9-step bisect in `patches/dark-techno.js` on 2026-05-17.
+
 ## `degrade` vs `sometimes`
 
 - `.degrade()` **removes** events.

@@ -47,6 +47,13 @@ Use as a fast lookup. Each row → the doc that has the full signature and examp
 | `delay`, `delaytime`, `delayfeedback` | `docs/07-effects-reference.md` |
 | `duckorbit`, `duckattack`, `duckdepth` | `docs/07-effects-reference.md` |
 | `every` | `docs/09-conditional-modifiers.md` |
+| `gate` / `gat` | `.claude/skills/strudel/LIVE-PERFORMANCE.md` §8 |
+| `channel` (multi-output routing) | `.claude/skills/strudel/LIVE-PERFORMANCE.md` §8 |
+| `slider(value, min, max, step)` | `.claude/skills/strudel/LIVE-PERFORMANCE.md` §5, §8 |
+| `ribbon` / `rib` | `.claude/skills/strudel/LIVE-PERFORMANCE.md` §3 |
+| `scrub`, `seg` / `segment` | `.claude/skills/strudel/LIVE-PERFORMANCE.md` §2 |
+| `supersaw` (Reese bass) | `.claude/skills/strudel/LIVE-PERFORMANCE.md` §7a |
+| `s("white")` / `s("pink")` / `s("brown")` (noise-as-hat) | `.claude/skills/strudel/LIVE-PERFORMANCE.md` §7b |
 | `firstOf`, `lastOf` | `docs/09-conditional-modifiers.md` |
 | `fm`, `fmh`, `partials`, `vib` | `docs/08-synths.md` |
 | `gain`, `velocity` | `docs/07-effects-reference.md` |
